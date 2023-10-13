@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">AppHorario</string>
+    <string name="inicio_sesion"><u>Iniciar sesión</u></string>
+    <string name="rut">RUT</string>
+    <string name="clave">Clave</string>
+    <string name="ingresar">Ingresar</string>
 </resources>
