@@ -1,4 +1,4 @@
-package com.darklove.apphorario;
+package com.darklove.appcalendario;
 
 import org.junit.Test;
 

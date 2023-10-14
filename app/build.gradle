@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.darklove.apphorario'
+    namespace 'com.darklove.appcalendario'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.darklove.apphorario"
+        applicationId 'com.darklove.appcalendario'
         minSdk 24
         targetSdk 33
         versionCode 1

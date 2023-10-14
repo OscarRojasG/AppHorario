@@ -1,4 +1,4 @@
-package com.darklove.apphorario;
+package com.darklove.appcalendario;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.darklove.apphorario", appContext.getPackageName());
+        assertEquals("com.darklove.appcalendario", appContext.getPackageName());
     }
 }
