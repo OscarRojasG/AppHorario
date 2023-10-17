@@ -55,6 +55,11 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
+            if (password.isEmpty()) {
+                Toast.makeText(getApplicationContext(), "Ingresa una clave", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Toast.makeText(getApplicationContext(), "RUT " + rut + ", Clave " + password, Toast.LENGTH_LONG).show();
         });
 
