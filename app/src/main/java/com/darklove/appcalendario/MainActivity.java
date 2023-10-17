@@ -28,6 +28,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "RUT " + rut + ", Clave " + password, Toast.LENGTH_LONG).show();
         });
 
+        TokenRequest tokenRequest = new TokenRequest();
+        String token = tokenRequest.getToken();
+
+        Toast.makeText(getApplicationContext(), token, Toast.LENGTH_LONG).show();
     }
 
 }
