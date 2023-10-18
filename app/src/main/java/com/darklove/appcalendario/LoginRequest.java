@@ -115,11 +115,29 @@ public class LoginRequest {
     }
 
     public int getUserId(String data) {
-        return 0;
+        int userId;
+
+        try {
+            JSONObject jsonObject = new JSONObject(data);
+            userId = jsonObject.getJSONObject("user").getInt("id");
+        } catch(JSONException e) {
+            throw new RuntimeException("No se pudo obtener la ID", e);
+        }
+
+        return userId;
     }
 
     public String getToken(String data) {
-        return null;
+        String token;
+
+        try {
+            JSONObject jsonObject = new JSONObject(data);
+            token = jsonObject.getString("token");
+        } catch(JSONException e) {
+            throw new RuntimeException("No se pudo obtener el token", e);
+        }
+
+        return token;
     }
 
 }

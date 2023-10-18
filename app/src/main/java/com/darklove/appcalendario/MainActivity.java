@@ -2,6 +2,7 @@ package com.darklove.appcalendario;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.text.Editable;
@@ -19,6 +20,15 @@ public class MainActivity extends AppCompatActivity {
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("userdata", MODE_PRIVATE);
+        String token = sharedPreferences.getString("token", null);
+        int userId = sharedPreferences.getInt("user_id", 0);
+
+        if (token != null && userId != 0) {
+            Toast.makeText(getApplicationContext(), token, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), String.valueOf(userId), Toast.LENGTH_SHORT).show();
+        }
 
         EditText etRut, etPassword;
         Button btnIngresar;
@@ -71,10 +81,14 @@ public class MainActivity extends AppCompatActivity {
         LoginRequest loginRequest = new LoginRequest(rut, password);
         String data = loginRequest.getData();
 
-        System.out.println(data);
-
         int id = loginRequest.getUserId(data);
         String token = loginRequest.getToken(data);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("userdata", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("user_id", id);
+        editor.putString("token", token);
+        editor.apply();
     }
 
     // Obtenido de https://es.stackoverflow.com/a/156485
