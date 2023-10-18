@@ -3,13 +3,12 @@ package com.darklove.appcalendario;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,6 +16,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
         EditText etRut, etPassword;
         Button btnIngresar;
@@ -60,13 +62,19 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            Toast.makeText(getApplicationContext(), "RUT " + rut + ", Clave " + password, Toast.LENGTH_LONG).show();
+            login(rut, password);
         });
 
-        TokenRequest tokenRequest = new TokenRequest();
-        String token = tokenRequest.getToken();
+    }
 
-        Toast.makeText(getApplicationContext(), token, Toast.LENGTH_LONG).show();
+    private void login(String rut, String password) {
+        LoginRequest loginRequest = new LoginRequest(rut, password);
+        String data = loginRequest.getData();
+
+        System.out.println(data);
+
+        int id = loginRequest.getUserId(data);
+        String token = loginRequest.getToken(data);
     }
 
     // Obtenido de https://es.stackoverflow.com/a/156485
