@@ -7,6 +7,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.darklove.appcalendario.requests.CourseRequest;
+import com.darklove.appcalendario.requests.UnauthorizedException;
+
 public class LoadingActivity extends AppCompatActivity {
 
     @Override
@@ -24,9 +27,17 @@ public class LoadingActivity extends AppCompatActivity {
             finish();
         }
 
-        Toast.makeText(getApplicationContext(), token, Toast.LENGTH_LONG).show();
+        try {
+            CourseRequest courseRequest = new CourseRequest(token, userId);
+            String data = courseRequest.getData();
 
-        // Cargar cursos
+            Toast.makeText(getApplicationContext(), data, Toast.LENGTH_LONG).show();
+        } catch(UnauthorizedException e) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
     }
 
 }

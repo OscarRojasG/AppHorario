@@ -2,6 +2,7 @@ package com.darklove.appcalendario;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.StrictMode;
 
 public class AppCalendario extends Application {
     private static Application application;
@@ -18,6 +19,9 @@ public class AppCalendario extends Application {
     public void onCreate() {
         super.onCreate();
         application = this;
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
     }
 
 }
