@@ -11,24 +11,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_login);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
-        SharedPreferences sharedPreferences = getSharedPreferences("userdata", MODE_PRIVATE);
-        String token = sharedPreferences.getString("token", null);
-        int userId = sharedPreferences.getInt("user_id", 0);
-
-        if (token != null && userId != 0) {
-            Toast.makeText(getApplicationContext(), token, Toast.LENGTH_SHORT).show();
-            Toast.makeText(getApplicationContext(), String.valueOf(userId), Toast.LENGTH_SHORT).show();
-        }
 
         EditText etRut, etPassword;
         Button btnIngresar;
