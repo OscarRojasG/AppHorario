@@ -10,6 +10,8 @@ import android.widget.Toast;
 import com.darklove.appcalendario.requests.CourseRequest;
 import com.darklove.appcalendario.requests.UnauthorizedException;
 
+import java.util.HashMap;
+
 public class LoadingActivity extends AppCompatActivity {
 
     @Override
@@ -31,7 +33,12 @@ public class LoadingActivity extends AppCompatActivity {
             CourseRequest courseRequest = new CourseRequest(token, userId);
             String data = courseRequest.getData();
 
-            Toast.makeText(getApplicationContext(), data, Toast.LENGTH_LONG).show();
+            HashMap<String, String> courses = courseRequest.getCourses(data);
+
+            Intent intent = new Intent(this, CalendarActivity.class);
+            intent.putExtra("courses", courses);
+            startActivity(intent);
+            finish();
         } catch(UnauthorizedException e) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);

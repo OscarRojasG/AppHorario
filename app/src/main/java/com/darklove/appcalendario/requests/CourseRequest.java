@@ -2,6 +2,7 @@ package com.darklove.appcalendario.requests;
 
 import com.darklove.appcalendario.Util;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
+import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -78,4 +80,23 @@ public class CourseRequest extends Request {
         return getResponse(http);
     }
 
+    public HashMap<String, String> getCourses(String data) {
+        HashMap<String, String> courses = new HashMap<>();
+
+        try {
+            JSONObject jsonObject = new JSONObject(data);
+            JSONArray jsonArray = jsonObject.getJSONArray("data");
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject courseData = jsonArray.getJSONObject(i).getJSONObject("attributes");
+                String code = courseData.getString("course_code");
+                String name = courseData.getString("name");
+                courses.put(code, name);
+            }
+        } catch(JSONException e) {
+            throw new RuntimeException("Error al intentar obtener los cursos", e);
+        }
+
+        return courses;
+    }
 }
