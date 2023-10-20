@@ -2,6 +2,7 @@ package com.darklove.appcalendario;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -17,6 +18,8 @@ import com.darklove.appcalendario.requests.MaxAttemptsException;
 import com.darklove.appcalendario.requests.UnauthorizedException;
 
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -81,31 +84,41 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void login(String rut, String password) {
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Cargando");
+        progressDialog.show();
+
         LoginRequest loginRequest = new LoginRequest(rut, password);
-        String data;
 
-        try {
-            data = loginRequest.getData();
-        } catch (UnauthorizedException e) {
-            String message = "RUT o clave ingresados incorrectamente";
-            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-            return;
-        } catch (MaxAttemptsException e) {
-            String message = "Demasiados intentos fallidos. Intenta de nuevo más tarde";
-            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-            return;
-        }
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                return loginRequest.getData();
+            } catch (UnauthorizedException e) {
+                throw new CompletionException("RUT o clave ingresados incorrectamente", e);
+            } catch (MaxAttemptsException e) {
+                throw new CompletionException("Demasiados intentos fallidos. Intenta de nuevo más tarde", e);
+            }
+        }).thenAccept(data -> {
+            int id = loginRequest.getUserId(data);
+            String token = loginRequest.getToken(data);
 
-        int id = loginRequest.getUserId(data);
-        String token = loginRequest.getToken(data);
+            SharedPreferences sharedPreferences = getSharedPreferences("userdata", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("user_id", id);
+            editor.putString("token", token);
+            editor.apply();
 
-        SharedPreferences sharedPreferences = getSharedPreferences("userdata", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt("user_id", id);
-        editor.putString("token", token);
-        editor.apply();
-
-        loadCourses(token, id);
+            runOnUiThread(() -> {
+                loadCourses(token, id);
+                progressDialog.hide();
+            });
+        }).exceptionally(e -> {
+            runOnUiThread(() -> {
+                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                progressDialog.hide();
+            });
+            return null;
+        });
     }
 
     private void loadCourses(String token, int id) {
