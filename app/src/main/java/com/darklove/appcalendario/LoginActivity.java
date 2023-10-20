@@ -2,6 +2,8 @@ package com.darklove.appcalendario;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -11,7 +13,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.darklove.appcalendario.requests.CourseRequest;
 import com.darklove.appcalendario.requests.LoginRequest;
+import com.darklove.appcalendario.requests.UnauthorizedException;
+
+import java.util.HashMap;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -79,6 +85,27 @@ public class LoginActivity extends AppCompatActivity {
         editor.putInt("user_id", id);
         editor.putString("token", token);
         editor.apply();
+
+        loadCourses(token, id);
+    }
+
+    private void loadCourses(String token, int id) {
+        HashMap<String, String> courses;
+
+        try {
+            CourseRequest courseRequest = new CourseRequest(token, id);
+            String data = courseRequest.getData();
+            courses = courseRequest.getCourses(data);
+        } catch(UnauthorizedException e) {
+            String message = "Ocurrió un error al validar tus credenciales. Intenta de nuevo más tarde";
+            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, CalendarActivity.class);
+        intent.putExtra("courses", courses);
+        startActivity(intent);
+        finish();
     }
 
     // Obtenido de https://es.stackoverflow.com/a/156485

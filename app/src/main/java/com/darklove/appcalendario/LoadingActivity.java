@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.darklove.appcalendario.requests.CourseRequest;
 import com.darklove.appcalendario.requests.UnauthorizedException;
@@ -27,6 +26,7 @@ public class LoadingActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
             finish();
+            return;
         }
 
         try {
