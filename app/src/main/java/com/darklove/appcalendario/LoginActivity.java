@@ -2,11 +2,9 @@ package com.darklove.appcalendario;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
@@ -15,6 +13,7 @@ import android.widget.Toast;
 
 import com.darklove.appcalendario.requests.CourseRequest;
 import com.darklove.appcalendario.requests.LoginRequest;
+import com.darklove.appcalendario.requests.MaxAttemptsException;
 import com.darklove.appcalendario.requests.UnauthorizedException;
 
 import java.util.HashMap;
@@ -59,12 +58,20 @@ public class LoginActivity extends AppCompatActivity {
             String password = etPassword.getText().toString();
 
             if (!validateRut(rut)) {
-                Toast.makeText(getApplicationContext(), "El RUT ingresado no es válido", Toast.LENGTH_SHORT).show();
+                String message = "El RUT ingresado no es válido";
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (password.isEmpty()) {
-                Toast.makeText(getApplicationContext(), "Ingresa una clave", Toast.LENGTH_SHORT).show();
+                String message = "Ingresa una clave";
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (password.length() < 8 || password.length() > 15) {
+                String message = "La clave debe tener entre 8 a 15 caracteres";
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -75,7 +82,19 @@ public class LoginActivity extends AppCompatActivity {
 
     private void login(String rut, String password) {
         LoginRequest loginRequest = new LoginRequest(rut, password);
-        String data = loginRequest.getData();
+        String data;
+
+        try {
+            data = loginRequest.getData();
+        } catch (UnauthorizedException e) {
+            String message = "RUT o clave ingresados incorrectamente";
+            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+            return;
+        } catch (MaxAttemptsException e) {
+            String message = "Demasiados intentos fallidos. Intenta de nuevo más tarde";
+            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+            return;
+        }
 
         int id = loginRequest.getUserId(data);
         String token = loginRequest.getToken(data);

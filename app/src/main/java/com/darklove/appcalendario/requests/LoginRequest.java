@@ -5,9 +5,7 @@ import com.darklove.appcalendario.Util;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -42,7 +40,7 @@ public class LoginRequest extends Request {
         }
     }
 
-    public String getData() {
+    public String getData() throws UnauthorizedException, MaxAttemptsException {
         HttpsURLConnection http;
 
         try {
@@ -69,6 +67,15 @@ public class LoginRequest extends Request {
             outputStream.close();
         } catch (IOException e) {
             throw new RuntimeException("Error al enviar datos de solicitud", e);
+        }
+
+        try {
+            int code = http.getResponseCode();
+            System.out.println(code);
+            if (code == 401 | code == 422) throw new UnauthorizedException();
+            if (code == 429) throw new MaxAttemptsException();
+        } catch (IOException e) {
+            throw new RuntimeException("Error al obtener código de respuesta", e);
         }
 
         return getResponse(http);
