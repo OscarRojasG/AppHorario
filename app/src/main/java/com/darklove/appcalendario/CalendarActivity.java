@@ -104,13 +104,11 @@ public class CalendarActivity extends AppCompatActivity {
                 String courseCode = (String) row.get(1);
                 String name = (String) row.get(2);
 
-                DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
-                Date date = dateFormat.parse((String) row.get(3));
+                Date date = Util.parseDate((String) row.get(3));
 
-                DateFormat timeFormat = new SimpleDateFormat("hh:mm");
                 Date time = null;
                 if (row.size() == 5) {
-                    time = timeFormat.parse((String) row.get(4));
+                    time = Util.parseTime((String) row.get(4));
                 }
 
                 activity.put("id", id);
