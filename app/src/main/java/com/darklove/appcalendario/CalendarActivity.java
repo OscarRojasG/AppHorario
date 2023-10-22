@@ -3,6 +3,9 @@ package com.darklove.appcalendario;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -42,6 +45,11 @@ public class CalendarActivity extends AppCompatActivity {
         courses = (HashMap<String, String>) getIntent().getSerializableExtra("courses");
         JSONArray activities = getCalendarActivities();
         System.out.println(activities);
+
+        LinearLayout parentLayout = findViewById(R.id.bubble_container);
+        for (int i = 0; i < activities.length(); i++) {
+            getLayoutInflater().inflate(R.layout.calendar_bubble, parentLayout);
+        }
     }
 
     private JSONArray getCalendarActivities() {
