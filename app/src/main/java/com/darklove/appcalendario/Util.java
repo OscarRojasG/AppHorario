@@ -14,7 +14,7 @@ import java.util.Date;
 
 public final class Util {
     private static final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
-    private static final DateFormat timeFormat = new SimpleDateFormat("hh:mm");
+    private static final DateFormat timeFormat = new SimpleDateFormat("HH:mm");
     private static final String[] months = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
     private static final String[] daysOfWeek = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
 
