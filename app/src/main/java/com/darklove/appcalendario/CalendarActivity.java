@@ -27,7 +27,9 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +54,8 @@ public class CalendarActivity extends AppCompatActivity {
 
         CompletableFuture.supplyAsync(() -> {
             courses = (HashMap<String, String>) getIntent().getSerializableExtra("courses");
-            return getCalendarActivities();
+            JSONArray activities = getCalendarActivities();
+            return sortActivities(activities);
         }).thenAccept((activities) -> {
             runOnUiThread(() -> {
                 progressDialog.hide();
@@ -155,6 +158,43 @@ public class CalendarActivity extends AppCompatActivity {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
         return service;
+    }
+
+    private JSONArray sortActivities(JSONArray activities) {
+        List<JSONObject> activityList = new ArrayList<>();
+        for (int i = 0; i < activities.length(); i++) {
+            try {
+                activityList.add(activities.getJSONObject(i));
+            } catch (JSONException e) {}
+        }
+
+        Collections.sort(activityList, new Comparator<JSONObject>() {
+            @Override
+            public int compare(JSONObject a, JSONObject b) {
+                try {
+                    Date dateA = (Date) a.get("date");
+                    Date dateB = (Date) b.get("date");
+
+                    int compare = dateA.compareTo(dateB);
+                    if (compare != 0) return compare;
+                    if (!a.has("time")) return 1;
+                    if (!b.has("time")) return -1;
+
+                    Date timeA = (Date) a.get("time");
+                    Date timeB = (Date) b.get("time");
+                    return timeA.compareTo(timeB);
+                } catch (JSONException e) {}
+
+                return 0;
+            }
+        });
+
+        JSONArray sortedArray = new JSONArray();
+        for (int i = 0; i < activityList.size(); i++) {
+            sortedArray.put(activityList.get(i));
+        }
+
+        return sortedArray;
     }
 
 }
