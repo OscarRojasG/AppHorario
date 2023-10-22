@@ -2,6 +2,7 @@ package com.darklove.appcalendario;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +31,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class CalendarActivity extends AppCompatActivity {
     private static final String APPLICATION_NAME = "AppCalendario";
@@ -44,39 +46,48 @@ public class CalendarActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
 
-        courses = (HashMap<String, String>) getIntent().getSerializableExtra("courses");
-        JSONArray activities = getCalendarActivities();
-        System.out.println(activities);
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Cargando calendario");
+        progressDialog.show();
 
-        LinearLayout parentLayout = findViewById(R.id.bubble_container);
-        for (int i = 0; i < activities.length(); i++) {
-            View bubbleLayout = getLayoutInflater().inflate(R.layout.calendar_bubble, parentLayout, false);
-            TextView txtName = bubbleLayout.findViewById(R.id.calendar_bubble_name);
-            TextView txtCourse = bubbleLayout.findViewById(R.id.calendar_bubble_course);
-            TextView txtDatetime = bubbleLayout.findViewById(R.id.calendar_bubble_datetime);
+        CompletableFuture.supplyAsync(() -> {
+            courses = (HashMap<String, String>) getIntent().getSerializableExtra("courses");
+            return getCalendarActivities();
+        }).thenAccept((activities) -> {
+            runOnUiThread(() -> {
+                progressDialog.hide();
 
-            try {
-                JSONObject activity = activities.getJSONObject(i);
-                String name = activity.getString("name");
-                String courseCode = activity.getString("course_code");
-                String courseName = courses.get(courseCode);
-                String date = Util.formatDate((Date) activity.get("date"));
+                LinearLayout parentLayout = findViewById(R.id.bubble_container);
+                for (int i = 0; i < activities.length(); i++) {
+                    View bubbleLayout = getLayoutInflater().inflate(R.layout.calendar_bubble, parentLayout, false);
+                    TextView txtName = bubbleLayout.findViewById(R.id.calendar_bubble_name);
+                    TextView txtCourse = bubbleLayout.findViewById(R.id.calendar_bubble_course);
+                    TextView txtDatetime = bubbleLayout.findViewById(R.id.calendar_bubble_datetime);
 
-                String time = "";
-                if (activity.has("time")) {
-                    time = Util.formatTime((Date) activity.get("time"));
+                    try {
+                        JSONObject activity = activities.getJSONObject(i);
+                        String name = activity.getString("name");
+                        String courseCode = activity.getString("course_code");
+                        String courseName = courses.get(courseCode);
+                        String date = Util.formatDate((Date) activity.get("date"));
+
+                        String time = "";
+                        if (activity.has("time")) {
+                            time = Util.formatTime((Date) activity.get("time"));
+                        }
+
+                        txtName.setText(name);
+                        txtCourse.setText(courseCode + " " + courseName);
+                        txtDatetime.setText(date + " " + time);
+                    } catch (JSONException e) {
+                        String message = "Error al mostrar actividades";
+                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                    }
+
+                    parentLayout.addView(bubbleLayout);
                 }
-
-                txtName.setText(name);
-                txtCourse.setText(courseCode + " " + courseName);
-                txtDatetime.setText(date + " " + time);
-            } catch (JSONException e) {
-                Toast.makeText(this, "Error al mostrar actividades", Toast.LENGTH_LONG).show();
-                e.printStackTrace();
-            }
-
-            parentLayout.addView(bubbleLayout);
-        }
+            });
+        });
     }
 
     private JSONArray getCalendarActivities() {
