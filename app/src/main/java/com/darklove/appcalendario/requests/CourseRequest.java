@@ -89,7 +89,9 @@ public class CourseRequest extends Request {
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject courseData = jsonArray.getJSONObject(i).getJSONObject("attributes");
-                String code = courseData.getString("course_code");
+                String codeInitials = courseData.getString("initials");
+                String codeNumber = courseData.getString("number");
+                String code = codeInitials + codeNumber;
                 String name = courseData.getString("name");
                 courses.put(code, name);
             }
