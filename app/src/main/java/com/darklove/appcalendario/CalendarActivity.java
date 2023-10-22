@@ -51,6 +51,7 @@ public class CalendarActivity extends AppCompatActivity {
 
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Cargando calendario");
+        progressDialog.setCancelable(false);
         progressDialog.show();
 
         CompletableFuture.supplyAsync(() -> {

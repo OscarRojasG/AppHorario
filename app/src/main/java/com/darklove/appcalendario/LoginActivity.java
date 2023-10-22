@@ -86,6 +86,7 @@ public class LoginActivity extends AppCompatActivity {
     private void login(String rut, String password) {
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Cargando");
+        progressDialog.setCancelable(false);
         progressDialog.show();
 
         LoginRequest loginRequest = new LoginRequest(rut, password);
