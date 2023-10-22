@@ -6,8 +6,13 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public final class Util {
+    private static final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+    private static final DateFormat timeFormat = new SimpleDateFormat("hh:mm");
 
     public static JSONObject readJsonFromAssets(String filename) {
         JSONObject jsonObject;
@@ -27,6 +32,14 @@ public final class Util {
         }
 
         return jsonObject;
+    }
+
+    public static String formatDate(Date date) {
+        return dateFormat.format(date);
+    }
+
+    public static String formatTime(Date time) {
+        return timeFormat.format(time);
     }
 
 }

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -18,6 +19,7 @@ import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -48,7 +50,32 @@ public class CalendarActivity extends AppCompatActivity {
 
         LinearLayout parentLayout = findViewById(R.id.bubble_container);
         for (int i = 0; i < activities.length(); i++) {
-            getLayoutInflater().inflate(R.layout.calendar_bubble, parentLayout);
+            View bubbleLayout = getLayoutInflater().inflate(R.layout.calendar_bubble, parentLayout, false);
+            TextView txtName = bubbleLayout.findViewById(R.id.calendar_bubble_name);
+            TextView txtCourse = bubbleLayout.findViewById(R.id.calendar_bubble_course);
+            TextView txtDatetime = bubbleLayout.findViewById(R.id.calendar_bubble_datetime);
+
+            try {
+                JSONObject activity = activities.getJSONObject(i);
+                String name = activity.getString("name");
+                String courseCode = activity.getString("course_code");
+                String courseName = courses.get(courseCode);
+                String date = Util.formatDate((Date) activity.get("date"));
+
+                String time = "";
+                if (activity.has("time")) {
+                    time = Util.formatTime((Date) activity.get("time"));
+                }
+
+                txtName.setText(name);
+                txtCourse.setText(courseCode + " " + courseName);
+                txtDatetime.setText(date + " " + time);
+            } catch (JSONException e) {
+                Toast.makeText(this, "Error al mostrar actividades", Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+
+            parentLayout.addView(bubbleLayout);
         }
     }
 
@@ -75,11 +102,11 @@ public class CalendarActivity extends AppCompatActivity {
                     time = timeFormat.parse((String) row.get(4));
                 }
 
-                activity.put("Id", id);
-                activity.put("CourseCode", courseCode);
-                activity.put("Name", name);
-                activity.put("Date", date);
-                activity.put("Time", time);
+                activity.put("id", id);
+                activity.put("course_code", courseCode);
+                activity.put("name", name);
+                activity.put("date", date);
+                activity.put("time", time);
                 activities.put(activity);
             } catch(Exception e) { }
 
