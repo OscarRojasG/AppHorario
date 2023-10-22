@@ -38,7 +38,7 @@ public final class Util {
         return jsonObject;
     }
 
-    public static String formatDate(Date date) {
+    public static String customFormatDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         int month = calendar.get(Calendar.MONTH);
@@ -46,6 +46,10 @@ public final class Util {
         int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
 
         return daysOfWeek[(dayOfWeek+5)%7] + " " + dayOfMonth + " de " + months[month].toLowerCase();
+    }
+
+    public static String formatDate(Date date) {
+        return dateFormat.format(date);
     }
 
     public static String formatTime(Date time) {

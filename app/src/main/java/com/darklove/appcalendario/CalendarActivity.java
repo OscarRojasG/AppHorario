@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,7 +73,7 @@ public class CalendarActivity extends AppCompatActivity {
                         String name = activity.getString("name");
                         String courseCode = activity.getString("course_code");
                         String courseName = courses.get(courseCode);
-                        String date = Util.formatDate((Date) activity.get("date"));
+                        String date = Util.customFormatDate((Date) activity.get("date"));
 
                         String time = "";
                         if (activity.has("time")) {
@@ -99,19 +100,32 @@ public class CalendarActivity extends AppCompatActivity {
 
         if (values == null || values.isEmpty()) return activities;
 
+        Date currentDate = null;
+        Date currentTime = null;
+        try {
+            currentDate = Util.parseDate(Util.formatDate(new Date()));
+            currentTime = Util.parseTime(Util.formatTime(new Date()));
+        } catch (ParseException e) {}
+
         for (List row : values) {
             JSONObject activity = new JSONObject();
 
             try {
                 int id = Integer.parseInt((String) row.get(0));
                 String courseCode = (String) row.get(1);
+                if (!courses.containsKey(courseCode)) continue;
+
                 String name = (String) row.get(2);
 
                 Date date = Util.parseDate((String) row.get(3));
+                if (date.compareTo(currentDate) < 0) continue;
 
                 Date time = null;
                 if (row.size() == 5) {
                     time = Util.parseTime((String) row.get(4));
+                    if (date.compareTo(currentDate) == 0 && time.compareTo(currentTime) < 0) {
+                        continue;
+                    }
                 }
 
                 activity.put("id", id);
