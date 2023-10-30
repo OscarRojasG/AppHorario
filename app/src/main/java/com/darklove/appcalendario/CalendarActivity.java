@@ -3,12 +3,14 @@ package com.darklove.appcalendario;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
@@ -21,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -77,6 +78,12 @@ public class CalendarActivity extends AppCompatActivity {
                     parentLayout.addView(bubbleLayout);
                 }
             });
+        });
+
+        FloatingActionButton btnSuggestion =  findViewById(R.id.btnSuggestion);
+        btnSuggestion.setOnClickListener(view -> {
+            Intent intent = new Intent(this, SuggestionActivity.class);
+            startActivity(intent);
         });
     }
 

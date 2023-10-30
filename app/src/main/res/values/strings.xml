@@ -4,9 +4,14 @@
     <string name="rut">RUT</string>
     <string name="clave">Clave</string>
     <string name="ingresar">Ingresar</string>
-    <string name="title_activity_loading">LoadingActivity</string>
 
     <string name="calendar_bubble_name">Actividad</string>
     <string name="calendar_bubble_course">COD123 Curso de Prueba</string>
     <string name="calendar_bubble_datetime">1 de enero, 23:59</string>
+
+    <string name="activity_title">Nombre de la actividad</string>
+    <string name="activity_course">Seleccione curso</string>
+    <string name="activity_date">Fecha</string>
+    <string name="activity_time">Hora (opcional)</string>
+    <string name="send_suggest">Enviar</string>
 </resources>
