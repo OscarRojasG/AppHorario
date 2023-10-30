@@ -123,12 +123,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loadCourses(String token, int id) {
-        HashMap<String, String> courses;
-
         try {
             CourseRequest courseRequest = new CourseRequest(token, id);
             String data = courseRequest.getData();
-            courses = courseRequest.getCourses(data);
+            HashMap<String, String> courses = courseRequest.getCourses(data);
+            UserData.getInstance().setCourses(courses);
         } catch(UnauthorizedException e) {
             String message = "Ocurrió un error al validar tus credenciales. Intenta de nuevo más tarde";
             Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
@@ -136,7 +135,6 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         Intent intent = new Intent(this, CalendarActivity.class);
-        intent.putExtra("courses", courses);
         startActivity(intent);
         finish();
     }

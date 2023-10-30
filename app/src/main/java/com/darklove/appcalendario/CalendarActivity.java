@@ -4,30 +4,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,12 +26,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class CalendarActivity extends AppCompatActivity {
-    private static final String APPLICATION_NAME = "AppCalendario";
-    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
-    private static final String CREDENTIALS_FILE_NAME = "credentials.json";
-
-    private HashMap<String, String> courses;
+    private UserData userData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +40,7 @@ public class CalendarActivity extends AppCompatActivity {
         progressDialog.show();
 
         CompletableFuture.supplyAsync(() -> {
-            courses = (HashMap<String, String>) getIntent().getSerializableExtra("courses");
+            userData = UserData.getInstance();
             JSONArray activities = getCalendarActivities();
             return sortActivities(activities);
         }).thenAccept((activities) -> {
@@ -73,7 +58,7 @@ public class CalendarActivity extends AppCompatActivity {
                         JSONObject activity = activities.getJSONObject(i);
                         String name = activity.getString("name");
                         String courseCode = activity.getString("course_code");
-                        String courseName = courses.get(courseCode);
+                        String courseName = userData.getCourseName(courseCode);
                         String date = Util.customFormatDate((Date) activity.get("date"));
 
                         String time = "";
@@ -114,7 +99,7 @@ public class CalendarActivity extends AppCompatActivity {
             try {
                 int id = Integer.parseInt((String) row.get(0));
                 String courseCode = (String) row.get(1);
-                if (!courses.containsKey(courseCode)) continue;
+                if (!userData.isEnrolled(courseCode)) continue;
 
                 String name = (String) row.get(2);
 
@@ -145,7 +130,7 @@ public class CalendarActivity extends AppCompatActivity {
     private List<List<Object>> makeRequest() {
         Sheets service;
         try {
-            service = getSheetService();
+            service = AppCalendario.getSheetService();
 
             JSONObject env = Util.readJsonFromAssets("env.json");
             String spreadsheetId = env.getString("spreadsheet_id");
@@ -162,17 +147,6 @@ public class CalendarActivity extends AppCompatActivity {
         }
 
         return null;
-    }
-
-    private Sheets getSheetService() throws GeneralSecurityException, IOException {
-        NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        GoogleCredential credential = GoogleCredential.fromStream(getAssets().open(CREDENTIALS_FILE_NAME))
-                .createScoped(Collections.singleton(SheetsScopes.SPREADSHEETS));
-
-        Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-                .setApplicationName(APPLICATION_NAME)
-                .build();
-        return service;
     }
 
     private JSONArray sortActivities(JSONArray activities) {

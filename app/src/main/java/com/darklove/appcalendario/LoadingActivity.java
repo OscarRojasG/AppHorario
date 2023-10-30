@@ -31,17 +31,17 @@ public class LoadingActivity extends AppCompatActivity {
             return;
         }
 
-        CompletableFuture.supplyAsync(() -> {
+        CompletableFuture.runAsync(() -> {
             try {
                 CourseRequest courseRequest = new CourseRequest(token, userId);
                 String data = courseRequest.getData();
-                return courseRequest.getCourses(data);
+                HashMap<String, String> courses = courseRequest.getCourses(data);
+                UserData.getInstance().setCourses(courses);
             } catch(UnauthorizedException e) {
                 throw new CompletionException(e);
             }
-        }).thenAccept((courses) -> {
+        }).thenRunAsync(() -> {
             Intent intent = new Intent(this, CalendarActivity.class);
-            intent.putExtra("courses", courses);
             startActivity(intent);
             finish();
         }).exceptionally((e) -> {
