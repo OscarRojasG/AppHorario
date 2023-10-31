@@ -29,6 +29,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" >
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/activityName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
@@ -47,7 +48,7 @@
                 android:hint="@string/activity_course">
 
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                    android:id="@+id/filled_exposed_dropdown"
+                    android:id="@+id/activityCourse"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
@@ -66,6 +67,9 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" >
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/activityDate"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
@@ -84,6 +88,9 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" >
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/activityTime"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
