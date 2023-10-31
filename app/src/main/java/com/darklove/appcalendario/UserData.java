@@ -36,7 +36,6 @@ public class UserData {
             Map.Entry<String, String> pair = (Map.Entry) it.next();
             Course course = new Course(pair.getValue(), pair.getKey());
             courseList.add(course);
-            it.remove();
         }
 
         return courseList;
