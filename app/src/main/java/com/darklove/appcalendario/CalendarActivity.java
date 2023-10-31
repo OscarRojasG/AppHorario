@@ -46,7 +46,7 @@ public class CalendarActivity extends AppCompatActivity {
             return sortActivities(activities);
         }).thenAccept((activities) -> {
             runOnUiThread(() -> {
-                progressDialog.hide();
+                progressDialog.dismiss();
 
                 LinearLayout parentLayout = findViewById(R.id.bubble_container);
                 for (int i = 0; i < activities.length(); i++) {

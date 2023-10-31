@@ -69,11 +69,14 @@ public class SuggestionActivity extends AppCompatActivity {
                         throw new CompletionException("No fue posible enviar la solicitud", e);
                     }
                 }).thenRunAsync(() -> {
-                    finish();
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        finish();
+                    });
                 }).exceptionally((e) -> {
                     runOnUiThread(() -> {
                         Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                        progressDialog.hide();
+                        progressDialog.dismiss();
                     });
                     return null;
                 });

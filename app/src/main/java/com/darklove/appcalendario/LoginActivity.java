@@ -111,12 +111,12 @@ public class LoginActivity extends AppCompatActivity {
 
             runOnUiThread(() -> {
                 loadCourses(token, id);
-                progressDialog.hide();
+                progressDialog.dismiss();
             });
         }).exceptionally(e -> {
             runOnUiThread(() -> {
                 Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                progressDialog.hide();
+                progressDialog.dismiss();
             });
             return null;
         });
