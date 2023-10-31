@@ -2,9 +2,11 @@ package com.darklove.appcalendario;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -71,7 +73,15 @@ public class SuggestionActivity extends AppCompatActivity {
                 }).thenRunAsync(() -> {
                     runOnUiThread(() -> {
                         progressDialog.dismiss();
-                        finish();
+
+                        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+                        alertDialog.setTitle("Actividad enviada");
+                        alertDialog.setMessage("Si los datos son válidos, tu actividad " +
+                                "debería aparecer en la app dentro de las próximas horas :)");
+                        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
+                                (dialog, which) -> dialog.dismiss());
+                        alertDialog.setOnDismissListener(dialogInterface -> finish());
+                        alertDialog.show();
                     });
                 }).exceptionally((e) -> {
                     runOnUiThread(() -> {
