@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -28,6 +29,7 @@ public class SuggestionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_suggestion);
 
         Button btnSend = findViewById(R.id.btnSendSuggest);
+        TextInputEditText etName = findViewById(R.id.activityName);
 
         TextInputEditText etDate = findViewById(R.id.activityDate);
         configDateField(etDate);
@@ -39,7 +41,14 @@ public class SuggestionActivity extends AppCompatActivity {
         configCourseSpinner(courseSpinner);
 
         btnSend.setOnClickListener(view -> {
-            Toast.makeText(this, selectedCourse.getCode(), Toast.LENGTH_LONG).show();
+            String name = etName.getText().toString();
+            String date = etDate.getText().toString();
+            String time = etTime.getText().toString();
+
+            boolean result = validateFields(name, selectedCourse, date, time);
+            if (result) {
+                sendSuggestion(name, selectedCourse, date, time);
+            }
         });
 
     }
@@ -110,6 +119,49 @@ public class SuggestionActivity extends AppCompatActivity {
                 selectedCourse = course;
             }
         });
+    }
+
+    private boolean validateFields(String name, Course course, String date, String time) {
+        if(name.isEmpty()) {
+            String message = "El nombre no puede quedar vacío";
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        if(name.length() > 50) {
+            String message = "El nombre no puede tener más de 50 caracteres";
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        if(course == null) {
+            String message = "Por favor selecciona un curso";
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        if(date.isEmpty()) {
+            String message = "Por favor elige una fecha";
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        try {
+            Util.parseDate(date);
+            if(!time.isEmpty()) {
+                Util.parseTime(time);
+            }
+        } catch (ParseException e) {
+            String message = "Error al procesar la fecha o la hora.";
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        return true;
+    }
+
+    private void sendSuggestion(String name, Course course, String date, String time) {
+        Toast.makeText(getApplicationContext(), "Todo ok :)", Toast.LENGTH_LONG).show();
     }
 
 }
