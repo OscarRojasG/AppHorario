@@ -6,31 +6,41 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.DatePicker;
-import android.widget.TimePicker;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class SuggestionActivity extends AppCompatActivity {
     private final Calendar calendar = Calendar.getInstance();
+    private Course selectedCourse = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_suggestion);
 
+        Button btnSend = findViewById(R.id.btnSendSuggest);
+
         TextInputEditText etDate = findViewById(R.id.activityDate);
         configDateField(etDate);
 
         TextInputEditText etTime = findViewById(R.id.activityTime);
         configTimeField(etTime);
+
+        MaterialAutoCompleteTextView courseSpinner = findViewById(R.id.activityCourse);
+        configCourseSpinner(courseSpinner);
+
+        btnSend.setOnClickListener(view -> {
+            Toast.makeText(this, selectedCourse.getCode(), Toast.LENGTH_LONG).show();
+        });
 
     }
 
@@ -82,6 +92,22 @@ public class SuggestionActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 timePickerDialog.show();
+            }
+        });
+    }
+
+    private void configCourseSpinner(MaterialAutoCompleteTextView courseSpinner) {
+        courseSpinner.setKeyListener(null);
+
+        ArrayList<Course> courses = UserData.getInstance().getCourses();
+        ArrayAdapter courseAdapter = new CustomArrayAdapter(this, courses);
+        courseSpinner.setAdapter(courseAdapter);
+
+        courseSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Course course = (Course) parent.getItemAtPosition(position);
+                selectedCourse = course;
             }
         });
     }

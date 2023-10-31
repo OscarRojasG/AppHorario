@@ -1,5 +1,6 @@
 package com.darklove.appcalendario;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -32,8 +33,18 @@ public class UserData {
         return courses.get(courseCode);
     }
 
-    public Iterator<Map.Entry<String, String>> getCourses() {
-        return courses.entrySet().iterator();
+    public ArrayList<Course> getCourses() {
+        ArrayList<Course> courseList = new ArrayList<>();
+
+        Iterator it = courses.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, String> pair = (Map.Entry) it.next();
+            Course course = new Course(pair.getValue(), pair.getKey());
+            courseList.add(course);
+            it.remove();
+        }
+
+        return courseList;
     }
 
     public String getUsername() {
