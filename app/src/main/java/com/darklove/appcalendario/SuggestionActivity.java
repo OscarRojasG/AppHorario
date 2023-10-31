@@ -3,6 +3,7 @@ package com.darklove.appcalendario;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.text.InputType;
@@ -14,10 +15,19 @@ import android.widget.Toast;
 
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.AppendValuesResponse;
+import com.google.api.services.sheets.v4.model.ValueRange;
+
+import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public class SuggestionActivity extends AppCompatActivity {
     private final Calendar calendar = Calendar.getInstance();
@@ -47,10 +57,29 @@ public class SuggestionActivity extends AppCompatActivity {
 
             boolean result = validateFields(name, selectedCourse, date, time);
             if (result) {
-                sendSuggestion(name, selectedCourse, date, time);
-            }
-        });
+                ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setMessage("Enviando");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
 
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        sendSuggestion(name, selectedCourse, date, time);
+                    } catch(Exception e) {
+                        throw new CompletionException("No fue posible enviar la solicitud", e);
+                    }
+                }).thenRunAsync(() -> {
+                    finish();
+                }).exceptionally((e) -> {
+                    runOnUiThread(() -> {
+                        Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                        progressDialog.hide();
+                    });
+                    return null;
+                });
+            }
+
+        });
     }
 
     private void configDateField(TextInputEditText etDate) {
@@ -160,8 +189,25 @@ public class SuggestionActivity extends AppCompatActivity {
         return true;
     }
 
-    private void sendSuggestion(String name, Course course, String date, String time) {
-        Toast.makeText(getApplicationContext(), "Todo ok :)", Toast.LENGTH_LONG).show();
+    private void sendSuggestion(String name, Course course, String date, String time) throws Exception {
+        Sheets service;
+        service = AppCalendario.getSheetService();
+
+        JSONObject env = Util.readJsonFromAssets("env.json");
+        String spreadsheetId = env.getString("spreadsheet_id");
+        String range = "Sugerencias!A2:D";
+
+        List<List<Object>> rows = new ArrayList<>();
+        String[] values = {course.getCode(), name, date, time};
+        rows.add(Arrays.asList(values));
+
+        ValueRange body = new ValueRange().setValues(rows);
+        AppendValuesResponse result = service.spreadsheets().values()
+                .append(spreadsheetId, range, body)
+                .setValueInputOption("RAW")
+                .execute();
+        int updatedRows = result.getUpdates().getUpdatedRows();
+        if (updatedRows == 0) throw new RuntimeException();
     }
 
 }
