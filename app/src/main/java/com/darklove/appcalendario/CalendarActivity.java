@@ -1,6 +1,7 @@
 package com.darklove.appcalendario;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.darklove.appcalendario.requests.CalendarRequestException;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
@@ -21,7 +23,6 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -35,59 +36,83 @@ public class CalendarActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
 
+        userData = UserData.getInstance();
+
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Cargando calendario");
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        CompletableFuture.supplyAsync(() -> {
-            userData = UserData.getInstance();
-            JSONArray activities = getCalendarActivities();
-            return sortActivities(activities);
-        }).thenAccept((activities) -> {
-            runOnUiThread(() -> {
-                progressDialog.dismiss();
-
-                LinearLayout parentLayout = findViewById(R.id.bubble_container);
-                for (int i = 0; i < activities.length(); i++) {
-                    View bubbleLayout = getLayoutInflater().inflate(R.layout.calendar_bubble, parentLayout, false);
-                    TextView txtName = bubbleLayout.findViewById(R.id.calendar_bubble_name);
-                    TextView txtCourse = bubbleLayout.findViewById(R.id.calendar_bubble_course);
-                    TextView txtDatetime = bubbleLayout.findViewById(R.id.calendar_bubble_datetime);
-
+        CompletableFuture.runAsync(() -> {
+            try {
+                JSONArray activities = getCalendarActivities();
+                runOnUiThread(() -> showCalendarActivities(activities));
+            } catch (CalendarRequestException e) {
+                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            } finally {
+                runOnUiThread(() -> progressDialog.dismiss());
+            }
+        }).thenRun(() -> {
+            SwipeRefreshLayout swipeRefresh = findViewById(R.id.calendarSwipe);
+            swipeRefresh.setOnRefreshListener(() -> {
+                CompletableFuture.runAsync(() -> {
                     try {
-                        JSONObject activity = activities.getJSONObject(i);
-                        String name = activity.getString("name");
-                        String courseCode = activity.getString("course_code");
-                        String courseName = userData.getCourseName(courseCode);
-                        String date = Util.customFormatDate((Date) activity.get("date"));
-
-                        String time = "";
-                        if (activity.has("time")) {
-                            time = Util.formatTime((Date) activity.get("time"));
-                        }
-
-                        txtName.setText(name);
-                        txtCourse.setText(courseCode + " " + courseName);
-                        txtDatetime.setText(date + " " + time);
-                    } catch (JSONException e) {
-                        String message = "Error al mostrar actividades";
-                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                        JSONArray activities = getCalendarActivities();
+                        runOnUiThread(() -> {
+                            removeCurrentActivities();
+                            showCalendarActivities(activities);
+                        });
+                    } catch (CalendarRequestException e) {
+                        Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    } finally {
+                        runOnUiThread(() -> swipeRefresh.setRefreshing(false));
                     }
-
-                    parentLayout.addView(bubbleLayout);
-                }
+                });
             });
         });
 
-        FloatingActionButton btnSuggestion =  findViewById(R.id.btnSuggestion);
+        FloatingActionButton btnSuggestion = findViewById(R.id.btnSuggestion);
         btnSuggestion.setOnClickListener(view -> {
             Intent intent = new Intent(this, SuggestionActivity.class);
             startActivity(intent);
         });
     }
 
-    private JSONArray getCalendarActivities() {
+    private void removeCurrentActivities() {
+        LinearLayout parentLayout = findViewById(R.id.bubble_container);
+        parentLayout.removeAllViews();
+    }
+
+    private void showCalendarActivities(JSONArray activities) {
+        LinearLayout parentLayout = findViewById(R.id.bubble_container);
+        for (int i = 0; i < activities.length(); i++) {
+            View bubbleLayout = getLayoutInflater().inflate(R.layout.calendar_bubble, parentLayout, false);
+            TextView txtName = bubbleLayout.findViewById(R.id.calendar_bubble_name);
+            TextView txtCourse = bubbleLayout.findViewById(R.id.calendar_bubble_course);
+            TextView txtDatetime = bubbleLayout.findViewById(R.id.calendar_bubble_datetime);
+
+            try {
+                JSONObject activity = activities.getJSONObject(i);
+                String name = activity.getString("name");
+                String courseCode = activity.getString("course_code");
+                String courseName = userData.getCourseName(courseCode);
+                String date = Util.customFormatDate((Date) activity.get("date"));
+
+                String time = "";
+                if (activity.has("time")) {
+                    time = Util.formatTime((Date) activity.get("time"));
+                }
+
+                txtName.setText(name);
+                txtCourse.setText(courseCode + " " + courseName);
+                txtDatetime.setText(date + " " + time);
+            } catch(JSONException e) { }
+
+            parentLayout.addView(bubbleLayout);
+        }
+    }
+
+    private JSONArray getCalendarActivities() throws CalendarRequestException {
         List<List<Object>> values = makeRequest();
         JSONArray activities = new JSONArray();
 
@@ -131,10 +156,10 @@ public class CalendarActivity extends AppCompatActivity {
 
         }
 
-        return activities;
+        return sortActivities(activities);
     }
 
-    private List<List<Object>> makeRequest() {
+    private List<List<Object>> makeRequest() throws CalendarRequestException {
         Sheets service;
         try {
             service = AppCalendario.getSheetService();
@@ -149,11 +174,8 @@ public class CalendarActivity extends AppCompatActivity {
 
             return response.getValues();
         } catch(Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, "No fue posible cargar el calendario", Toast.LENGTH_LONG).show();
+            throw new CalendarRequestException();
         }
-
-        return null;
     }
 
     private JSONArray sortActivities(JSONArray activities) {
@@ -164,25 +186,22 @@ public class CalendarActivity extends AppCompatActivity {
             } catch (JSONException e) {}
         }
 
-        Collections.sort(activityList, new Comparator<JSONObject>() {
-            @Override
-            public int compare(JSONObject a, JSONObject b) {
-                try {
-                    Date dateA = (Date) a.get("date");
-                    Date dateB = (Date) b.get("date");
+        Collections.sort(activityList, (a, b) -> {
+            try {
+                Date dateA = (Date) a.get("date");
+                Date dateB = (Date) b.get("date");
 
-                    int compare = dateA.compareTo(dateB);
-                    if (compare != 0) return compare;
-                    if (!a.has("time")) return 1;
-                    if (!b.has("time")) return -1;
+                int compare = dateA.compareTo(dateB);
+                if (compare != 0) return compare;
+                if (!a.has("time")) return 1;
+                if (!b.has("time")) return -1;
 
-                    Date timeA = (Date) a.get("time");
-                    Date timeB = (Date) b.get("time");
-                    return timeA.compareTo(timeB);
-                } catch (JSONException e) {}
+                Date timeA = (Date) a.get("time");
+                Date timeB = (Date) b.get("time");
+                return timeA.compareTo(timeB);
+            } catch (JSONException e) {}
 
-                return 0;
-            }
+            return 0;
         });
 
         JSONArray sortedArray = new JSONArray();
