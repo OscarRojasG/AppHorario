@@ -8,6 +8,7 @@
     <string name="calendar_bubble_name">Actividad</string>
     <string name="calendar_bubble_course">COD123 Curso de Prueba</string>
     <string name="calendar_bubble_datetime">1 de enero, 23:59</string>
+    <string name="calendar_select_time">Seleccione periodo</string>
 
     <string name="activity_title">Nombre de la actividad</string>
     <string name="activity_course">Seleccione curso</string>

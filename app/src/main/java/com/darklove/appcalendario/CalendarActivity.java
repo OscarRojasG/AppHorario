@@ -7,6 +7,8 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,6 +16,7 @@ import android.widget.Toast;
 import com.darklove.appcalendario.requests.CalendarManager;
 import com.darklove.appcalendario.requests.CalendarRequestException;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
@@ -78,6 +81,8 @@ public class CalendarActivity extends AppCompatActivity {
             Intent intent = new Intent(this, SuggestionActivity.class);
             startActivity(intent);
         });
+
+        configPeriodSpinner();
     }
 
     private void clearTasks() {
@@ -114,6 +119,25 @@ public class CalendarActivity extends AppCompatActivity {
         txtDatetime.setText(date + " " + time);
 
         bubbleContainer.addView(bubbleLayout);
+    }
+
+    private void updateTasks() {
+        clearTasks();
+        showTasks();
+    }
+
+    private void configPeriodSpinner() {
+        MaterialAutoCompleteTextView spinner = findViewById(R.id.calendar_spinner_time);
+        spinner.setKeyListener(null);
+
+        ArrayAdapter adapter = new CalendarPeriodAdapter(this);
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemClickListener((parent, view, position, id) -> {
+            CalendarPeriod period = (CalendarPeriod) parent.getItemAtPosition(position);
+            calendarManager.setPeriod(period);
+            updateTasks();
+        });
     }
 
 }
