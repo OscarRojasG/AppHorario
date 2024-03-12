@@ -67,8 +67,10 @@
                 android:layout_alignParentBottom="true"
                 android:layout_gravity="bottom|end"
                 android:src="@drawable/plus_button"
-                app:backgroundTint="#0091EA"
-                app:elevation="0dp" />
+                app:fabCustomSize="56dp"
+                app:maxImageSize="56dp"
+                app:elevation="0dp"
+                app:tint="@null" />
 
         </RelativeLayout>
 

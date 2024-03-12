@@ -6,6 +6,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -114,7 +116,8 @@ public class CalendarActivity extends AppCompatActivity {
             time = Util.formatTime(task.getTime());
         }
 
-        txtName.setText(name);
+        Spanned spanned = Html.fromHtml("<u>" + name + "</u>", Html.FROM_HTML_MODE_LEGACY);
+        txtName.setText(spanned);
         txtCourse.setText(courseCode + " " + courseName);
         txtDatetime.setText(date + " " + time);
 

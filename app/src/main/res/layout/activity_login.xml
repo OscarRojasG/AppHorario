@@ -70,6 +70,7 @@
                 android:id="@+id/btnIngresar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                style="@style/button"
                 android:text="@string/ingresar" />
         </LinearLayout>
 

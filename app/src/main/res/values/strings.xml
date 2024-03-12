@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AppCalendario</string>
+    <string name="app_name">Calendario</string>
     <string name="inicio_sesion"><u>Iniciar sesión</u></string>
     <string name="rut">RUT</string>
     <string name="clave">Clave</string>
