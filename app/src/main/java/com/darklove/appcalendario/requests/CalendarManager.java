@@ -108,7 +108,7 @@ public class CalendarManager {
         });
     }
 
-    private Iterator<Task> getTasksOnPeriod(int timeUnit) {
+    private Iterator<Task> getTasksOnPeriod(int timeUnit, int offset) {
         Calendar calendar = Calendar.getInstance();
         calendar.setFirstDayOfWeek(Calendar.MONDAY);
         int currentYear = calendar.get(Calendar.YEAR);
@@ -123,7 +123,7 @@ public class CalendarManager {
             int year = calendarDate.get(Calendar.YEAR);
             int period = calendarDate.get(timeUnit);
 
-            if(year == currentYear && period == currentPeriod) {
+            if(year == currentYear && period == currentPeriod + offset) {
                 tasksPeriod.add(tasks.get(i));
             }
         }
@@ -131,14 +131,20 @@ public class CalendarManager {
         return tasksPeriod.iterator();
     }
 
+    private Iterator<Task> getTasksOnPeriod(int timeUnit) {
+        return getTasksOnPeriod(timeUnit, 0);
+    }
+
     public Iterator<Task> getTasks() {
         switch(calendarPeriod) {
             case ALL:
                 return tasks.iterator();
-            case MONTHLY:
-                return getTasksOnPeriod(Calendar.MONTH);
             case WEEKLY:
                 return getTasksOnPeriod(Calendar.WEEK_OF_YEAR);
+            case NEXT_WEEK:
+                return getTasksOnPeriod(Calendar.WEEK_OF_YEAR, 1);
+            case MONTHLY:
+                return getTasksOnPeriod(Calendar.MONTH);
         }
         return null;
     }
